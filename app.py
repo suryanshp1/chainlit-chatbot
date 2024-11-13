@@ -1,28 +1,9 @@
 import chainlit as cl
+from src.llm import ask_order, messages
 
-
-@cl.step(type="tool")
-async def tool():
-    # Fake tool
-    await cl.sleep(2)
-    return "Response from the tool!"
-
-
-@cl.on_message  # this function will be called every time a user inputs a message in the UI
+@cl.on_message
 async def main(message: cl.Message):
-    """
-    This function is called every time a user inputs a message in the UI.
-    It sends back an intermediate response from the tool, followed by the final answer.
-
-    Args:
-        message: The user's message.
-
-    Returns:
-        None.
-    """
-
-
-    # Call the tool
-    tool_res = await tool()
-
-    await cl.Message(content=tool_res).send()
+    messages.append({"role": "user", "content": message.content})
+    response = ask_order(messages)
+    messages.append({"role": "assistant", "content": response})
+    await cl.Message(content=response).send()
